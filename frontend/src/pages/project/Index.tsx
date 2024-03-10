@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { useRecoilState } from "recoil";
 import { ProjectsState } from "../../recoil/projects";
 import ProjectDetailCard from "./ProjectDetailCard";
-import { Button, CircularProgress, Drawer, TextField } from "@mui/material";
+import { Button, CircularProgress, Drawer } from "@mui/material";
 import TransText from "../../components/TransText/TransText";
 import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -18,21 +18,17 @@ const Project = () => {
   const [projects, setProjects] = useRecoilState(ProjectsState);
   const project = projects.find((p) => p.id === id);
   const [isNewConDrawerOpen, setIsNewConDrawerOpen] = useState(false);
-  const [newConName, setNewConName] = useState("");
-  const [newConTemplate, setNewConTemplate] = useState<number | undefined>(0);
+  const [newConTemplate, setNewConTemplate] = useState<number | undefined>(
+    undefined
+  );
 
   const onNewConDrawerClose = () => {
     setIsNewConDrawerOpen(false);
-    setNewConName("");
-    setNewConTemplate(0);
+    setNewConTemplate(undefined);
   };
 
   const onAddCon = () => {
     // validate
-    if (newConName === "") {
-      alert(`${Translate(18)}`);
-      return;
-    }
     if (newConTemplate === undefined) {
       alert(`${Translate(19)}`);
       return;
@@ -40,7 +36,6 @@ const Project = () => {
     // create new con
     const newCon = {
       id: GenRandId(),
-      name: newConName,
       template_id: newConTemplate,
       template_metadata: structuredClone(TempMapper[newConTemplate].init_temp),
     };
@@ -89,9 +84,9 @@ const Project = () => {
 
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         {project &&
-          project.coms.map((com) => (
+          project.coms.map((com, i) => (
             <div key={com.id}>
-              <ComCard com={com} project_id={project.id} />
+              <ComCard com={com} project_id={project.id} com_index={i} />
             </div>
           ))}
       </Box>
@@ -126,14 +121,48 @@ const Project = () => {
             <TransText textId={16} />
           </Typography>
 
-          <TextField
-            required
-            id="outlined-required"
-            label={Translate(17)}
-            sx={{ marginTop: "16px" }}
-            value={newConName}
-            onChange={(e) => setNewConName(e.target.value)}
-          />
+          {Object.keys(TempMapper).map((key: string) => (
+            <Box
+              key={key}
+              variant="outlined"
+              sx={{
+                marginTop: "16px",
+                cursor: "pointer",
+                border: `${
+                  newConTemplate === parseInt(key)
+                    ? "1px solid rgba(0,0,0,0.2)"
+                    : "none"
+                }`,
+                padding: "8px",
+                flexDirection: "row",
+                display: "flex",
+                alignItems: "center",
+                backgroundColor: `${
+                  newConTemplate === parseInt(key) ? "rgba(0,0,0,0.05)" : "none"
+                }`,
+                borderRadius: "16px",
+              }}
+              onClick={() => {
+                setNewConTemplate(parseInt(key));
+              }}
+            >
+              <video
+                loop
+                src={TempMapper[Number(key)].metadata.thumbnail_img_url}
+                width={150}
+                height={100}
+                style={{
+                  objectFit: "cover",
+                  marginRight: "16px",
+                  borderRadius: "8px",
+                }}
+                autoPlay
+              />
+              <Box sx={{ marginTop: "8px" }}>
+                {TempMapper[Number(key)].metadata.name}
+              </Box>
+            </Box>
+          ))}
 
           <Button
             variant="contained"

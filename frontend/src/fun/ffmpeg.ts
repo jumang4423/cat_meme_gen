@@ -35,6 +35,7 @@ export const RunFFMpeg = async (
     }>,
     outputFileName: string
 ): Promise<string> => {
+    try{
     // load instance if not already loaded
     if (!ffmpeg_inst) {
         await initFFmpeg();
@@ -56,4 +57,9 @@ export const RunFFMpeg = async (
     ffmpeg_inst = null;
 
     return videoUrl;
+} catch (e) {
+    alert("error occured. Please try again");
+    console.error(e);
+    throw e;
+}
 }

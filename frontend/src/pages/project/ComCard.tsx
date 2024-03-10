@@ -7,6 +7,7 @@ import {
   Button,
   Typography,
 } from "@mui/material";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import { Translate } from "../../components/TransText/translate";
 import { useRecoilState } from "recoil";
@@ -17,10 +18,12 @@ import VideoEditor from "../../components/VideoEditor/VideoEditor";
 interface Props {
   project_id: string;
   com: Com;
+  com_index: number;
 }
 
-const ComCard = ({ project_id, com }: Props) => {
-  const [, setProjects] = useRecoilState(ProjectsState);
+const ComCard = ({ project_id, com, com_index }: Props) => {
+  const [projects, setProjects] = useRecoilState(ProjectsState);
+  const coms = projects.find((p) => p.id === project_id)?.coms as Com[];
   const [isVideoEditorDrawerOpen, setIsVideoEditorDrawerOpen] = useState(false);
   const onComDelete = () => {
     if (confirm(Translate(15))) {
@@ -38,6 +41,44 @@ const ComCard = ({ project_id, com }: Props) => {
         )
       );
     }
+  };
+  const goComUp = () => {
+    const new_coms = structuredClone(coms);
+    const temp = new_coms[com_index];
+    new_coms[com_index] = new_coms[com_index - 1];
+    new_coms[com_index - 1] = temp;
+    setProjects((prevProjects) =>
+      structuredClone(
+        prevProjects.map((p) => {
+          if (p.id === project_id) {
+            return {
+              ...p,
+              coms: new_coms,
+            };
+          }
+          return p;
+        })
+      )
+    );
+  };
+  const goComDown = () => {
+    const new_coms = structuredClone(coms);
+    const temp = new_coms[com_index];
+    new_coms[com_index] = new_coms[com_index + 1];
+    new_coms[com_index + 1] = temp;
+    setProjects((prevProjects) =>
+      structuredClone(
+        prevProjects.map((p) => {
+          if (p.id === project_id) {
+            return {
+              ...p,
+              coms: new_coms,
+            };
+          }
+          return p;
+        })
+      )
+    );
   };
 
   return (
@@ -60,23 +101,28 @@ const ComCard = ({ project_id, com }: Props) => {
               width: "365px",
             }}
           >
-            {com.name}
+            {com.template_metadata.title}
           </Typography>
         </AccordionSummary>
 
-        <AccordionDetails>
-          <Typography
-            variant="h6"
-            component="div"
-            sx={{
-              whiteSpace: "pre-line",
-              wordWrap: "break-word",
-            }}
-          >
-            {com.template_id}
-          </Typography>
-        </AccordionDetails>
+        <AccordionDetails></AccordionDetails>
         <AccordionActions>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => goComUp()}
+            disabled={com_index === 0}
+          >
+            <ArrowUpwardIcon />
+          </Button>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => goComDown()}
+            disabled={com_index === coms.length - 1}
+          >
+            <ArrowDownwardIcon />
+          </Button>
           <Button
             variant="contained"
             color="primary"

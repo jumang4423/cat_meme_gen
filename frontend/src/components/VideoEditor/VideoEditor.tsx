@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  Divider,
   Drawer,
   Typography,
 } from "@mui/material";
@@ -17,6 +18,8 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import GraphicEqIcon from "@mui/icons-material/GraphicEq";
 import ImageSelector from "../ImageSelector";
 import { GetFileNameFromUrl } from "../../fun/getFilename";
+import MusicSelector from "../MusicSelector";
+import Backdrop from "@mui/material/Backdrop";
 
 interface Props {
   project_id: string;
@@ -32,6 +35,7 @@ const VideoEditor = ({ project_id, com_id, onVideoEditorClose }: Props) => {
   const [isVideoPreview, setIsVideoPreview] = useState(false);
   const [isPreviewRendering, setIsPreviewRendering] = useState(false);
   const [isWallpaperDrawerOpen, setIsWallpaperDrawerOpen] = useState(false);
+  const [isMusicDrawerOpen, setIsMusicDrawerOpen] = useState(false);
   const com: Com = projects
     .find((p) => p.id === project_id)
     ?.coms.find((c) => c.id === com_id) as Com;
@@ -107,6 +111,7 @@ const VideoEditor = ({ project_id, com_id, onVideoEditorClose }: Props) => {
               marginTop: "16px",
               display: isVideoRendering ? "none" : "block",
             }}
+            disabled={isPreviewRendering}
             color="primary"
             variant="outlined"
             onClick={() => {
@@ -123,7 +128,7 @@ const VideoEditor = ({ project_id, com_id, onVideoEditorClose }: Props) => {
                 justifyContent: "center",
               }}
             >
-              <GraphicEqIcon sx={{ marginRight: "8px" }} />
+              <GraphicEqIcon sx={{ marginRight: "8px" }} color="inherit" />
               Render Video
             </Box>
           </Button>
@@ -281,11 +286,81 @@ const VideoEditor = ({ project_id, com_id, onVideoEditorClose }: Props) => {
             )}
           </Box>
 
+          <Box
+            sx={{ display: "flex", flexDirection: "row", marginTop: "20px" }}
+          >
+            <Button
+              variant="outlined"
+              sx={{
+                marginRight: "16px",
+              }}
+              onClick={() => {
+                setIsMusicDrawerOpen(true);
+              }}
+            >
+              <EditIcon />
+            </Button>
+
+            <audio controls key={com.template_metadata.audio_url}>
+              <source src={com.template_metadata.audio_url} type="audio/mpeg" />
+            </audio>
+
+            {isMusicDrawerOpen && (
+              <MusicSelector
+                value={com.template_metadata.audio_url}
+                onChange={(value) => {
+                  setProjects((prevProjects) =>
+                    structuredClone(
+                      prevProjects.map((p) => {
+                        if (p.id === project_id) {
+                          return {
+                            ...p,
+                            coms: p.coms.map((c) => {
+                              if (c.id === com_id) {
+                                return {
+                                  ...c,
+                                  template_metadata: {
+                                    ...c.template_metadata,
+                                    audio_url: value,
+                                  },
+                                };
+                              }
+                              return c;
+                            }),
+                          };
+                        }
+                        return p;
+                      })
+                    )
+                  );
+                }}
+                isOpen={isMusicDrawerOpen}
+                onClose={() => setIsMusicDrawerOpen(false)}
+              />
+            )}
+          </Box>
+
           <Box sx={{ marginTop: "20px" }}>
             {template_maps && template_maps.conf_ui({ project_id, com_id })}
           </Box>
+          <Box sx={{ margin: "48px" }}>
+            <Divider />
+          </Box>
         </Box>
       </Drawer>
+
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isPreviewRendering}
+      >
+        <CircularProgress
+          color="inherit"
+          sx={{ display: "block", marginRight: "16px" }}
+        />
+        <Box>
+          <Typography variant="h6">Rendering Preview...</Typography>
+        </Box>
+      </Backdrop>
     </div>
   );
 };

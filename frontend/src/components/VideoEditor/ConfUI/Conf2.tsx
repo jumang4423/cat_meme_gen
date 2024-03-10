@@ -12,7 +12,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import ImageSelector from "../../ImageSelector";
 import { useState } from "react";
 
-const Conf0 = ({ project_id, com_id }: ConfUIType) => {
+const Conf2 = ({ project_id, com_id }: ConfUIType) => {
   const [projects, setProjects] = useRecoilState(ProjectsState);
   const [isOverlayDrawerOpen, setIsOverlayDrawerOpen] = useState(false);
   const com = projects
@@ -157,8 +157,8 @@ const Conf0 = ({ project_id, com_id }: ConfUIType) => {
             video duration: {com.template_metadata.video_length_sec} seconds
           </Typography>
           <Slider
-            min={1}
-            max={10}
+            min={2}
+            max={8}
             step={1}
             value={com.template_metadata.video_length_sec}
             marks
@@ -195,10 +195,10 @@ const Conf0 = ({ project_id, com_id }: ConfUIType) => {
   );
 };
 
-export default Conf0;
+export default Conf2;
 
 // Renderer
-export const Conf0Renderer: ComRendererType = async (
+export const Conf2Renderer: ComRendererType = async (
   com: Com,
   isPreview: boolean
 ): Promise<string> => {
@@ -209,9 +209,9 @@ export const Conf0Renderer: ComRendererType = async (
       fileUrl: metadata.background_img_url,
     },
     {
-      fileName: "cat_vibing.mp4",
+      fileName: "happy_cat.mp4",
       fileUrl:
-        "https://firebasestorage.googleapis.com/v0/b/cat-meme-gen.appspot.com/o/video%2Fcat_vibing.mp4?alt=media&token=a60607ec-a224-46af-aa4f-546168ba10c8",
+        "https://firebasestorage.googleapis.com/v0/b/cat-meme-gen.appspot.com/o/video%2Fhappy%20cat.mp4?alt=media&token=c2ec09db-3202-4a75-b5f6-f3c940fbe3e0",
     },
     {
       fileName: "bgm.mp3",
@@ -245,20 +245,20 @@ export const Conf0Renderer: ComRendererType = async (
     "-i",
     "bg.png",
     "-i",
-    "cat_vibing.mp4",
+    "happy_cat.mp4",
     "-i",
     "bgm.mp3",
     // Include 'center.png' conditionally
     ...(isCenterImg ? ["-i", "center.png"] : []),
     "-filter_complex",
     `
-    [1:v]scale=w=200:h=130[scaled],[scaled]colorkey=0x00FF00:0.3:0.1[ckout];
-    [0:v][ckout]overlay=x=10:y=90,drawbox=x=0:y=0:w=${title_font_x}:h=24:color=white:t=fill,drawtext=fontfile='ff.ttf':text='${title}':fontcolor=black:fontsize=18:x=2:y=3[out];
+    [1:v]scale=w=250:h=220[scaled],[scaled]colorkey=0x00FF00:0.3:0.1[ckout];
+    [0:v][ckout]overlay=x=10:y=40,drawbox=x=0:y=0:w=${title_font_x}:h=24:color=white:t=fill,drawtext=fontfile='ff.ttf':text='${title}':fontcolor=black:fontsize=18:x=2:y=3[out];
     [out]drawbox=x=120:y=180:w=${text_0_font_x}:h=22:color=white:t=fill,drawtext=fontfile='ff.ttf':text='${text_0}':fontcolor=black:fontsize=${text_0_fontsize}:x=122:y=182[out];
     [2:a]afade=t=out:st=${metadata.video_length_sec}:d=1[aout]
     ${
       isCenterImg
-        ? ";[3:v]scale=w=120:h=120[scaled2],[out][scaled2]overlay=x=140:y=40[out]"
+        ? ";[3:v]scale=w=90:h=90[scaled2],[out][scaled2]overlay=x=40:y=70[out]"
         : ""
     }
     `,
